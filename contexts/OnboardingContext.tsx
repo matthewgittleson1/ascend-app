@@ -2,9 +2,24 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, useSegments } from 'expo-router';
 
+export type UserData = {
+  name: string;
+  gender?: 'male' | 'female';
+  ageRange?: string;
+  familiarity?: string;
+  currentLooks?: string;
+  reason?: string;
+  lastHappy?: string;
+  unhappyFrequency?: string;
+  resultsSpeed?: string;
+  focusAreas?: string[];
+};
+
 type OnboardingContextType = {
   isOnboarded: boolean;
   setIsOnboarded: (value: boolean) => void;
+  userData: UserData;
+  updateUserData: (data: Partial<UserData>) => void;
 };
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
@@ -13,6 +28,7 @@ const STORAGE_KEY = 'hasCompletedOnboarding';
 
 export function OnboardingProvider({ children }: { children: React.ReactNode }) {
   const [isOnboarded, setIsOnboarded] = useState<boolean | null>(null);
+  const [userData, setUserData] = useState<UserData>({ name: '' });
   const segments = useSegments();
   const router = useRouter();
 
@@ -51,11 +67,17 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     }
   };
 
+  const updateUserData = (data: Partial<UserData>) => {
+    setUserData(prev => ({ ...prev, ...data }));
+  };
+
   return (
     <OnboardingContext.Provider
       value={{
         isOnboarded: isOnboarded ?? false,
         setIsOnboarded: handleSetIsOnboarded,
+        userData,
+        updateUserData,
       }}>
       {children}
     </OnboardingContext.Provider>

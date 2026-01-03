@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome Screen - Hero Graphic</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0B0F17;
+      --card: #151B28;
+      --accent: #38BDF8;
+      --accent-glow: rgba(56, 189, 248, 0.4);
+      --text: #F1F5F9;
+      --muted: #64748B;
+      --emerald: #10B981;
+    }
+
+    body {
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .phone-frame {
+      width: 390px;
+      height: 844px;
+      background: var(--bg);
+      border-radius: 48px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 
+        0 0 0 12px #1a1a1a,
+        0 0 0 14px #333,
+        0 50px 100px rgba(0,0,0,0.5);
+    }
+
+    .screen {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Background effects */
+    .bg-gradient {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.08) 0%, transparent 70%);
+    }
+
+    /* Dynamic Island */
+    .dynamic-island {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 34px;
+      background: #000;
+      border-radius: 20px;
+      z-index: 100;
+    }
+
+    /* Status bar */
+    .status-bar {
+      position: absolute;
+      top: 16px;
+      left: 32px;
+      right: 32px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      z-index: 100;
+    }
+
+    .status-icons {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    /* Skip button */
+    .skip-btn {
+      position: absolute;
+      top: 60px;
+      right: 24px;
+      font-size: 16px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* HERO GRAPHIC CONTAINER */
+    .hero-container {
+      position: absolute;
+      top: 80px;
+      left: 0;
+      right: 0;
+      height: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-graphic {
+      position: relative;
+      width: 320px;
+      height: 400px;
+    }
+
+    /* Concentric analysis rings */
+    .analysis-ring {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 1px solid rgba(56, 189, 248, 0.08);
+    }
+
+    .ring-1 { width: 140px; height: 140px; }
+    .ring-2 { width: 200px; height: 200px; border-style: dashed; border-color: rgba(56, 189, 248, 0.06); }
+    .ring-3 { width: 270px; height: 270px; }
+    .ring-4 { 
+      width: 340px; 
+      height: 340px; 
+      border-color: rgba(56, 189, 248, 0.04);
+    }
+
+    /* Rotating ring */
+    .ring-rotating {
+      width: 310px;
+      height: 310px;
+      border: 1.5px solid transparent;
+      border-top-color: rgba(56, 189, 248, 0.2);
+      border-right-color: rgba(56, 189, 248, 0.08);
+      animation: rotate 12s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* The 3D face mesh SVG */
+    .face-mesh {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 280px;
+      height: 280px;
+    }
+
+    /* Face base shape */
+    .face-base {
+      filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.3));
+    }
+
+    /* Face outline and features */
+    .face-line {
+      fill: none;
+      stroke: rgba(56, 189, 248, 0.4);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .face-line-accent {
+      stroke: rgba(56, 189, 248, 0.65);
+      stroke-width: 1.5;
+      filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.4));
+    }
+
+    .symmetry-line {
+      stroke: rgba(56, 189, 248, 0.15);
+      stroke-width: 1;
+      stroke-dasharray: 6 4;
+    }
+
+    /* Analysis points (nodes) */
+    .node {
+      fill: var(--accent);
+      filter: drop-shadow(0 0 6px var(--accent-glow));
+    }
+
+    .node-outer {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 1;
+      opacity: 0.4;
+    }
+
+    .node-pulse {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 1.5;
+      animation: nodePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes nodePulse {
+      0%, 100% { r: 8; opacity: 0.5; }
+      50% { r: 14; opacity: 0; }
+    }
+
+    /* Key feature nodes - larger */
+    .node-key {
+      fill: var(--accent);
+      filter: drop-shadow(0 0 12px var(--accent-glow));
+    }
+
+    /* Measurement lines */
+    .measure-line {
+      stroke: rgba(56, 189, 248, 0.25);
+      stroke-width: 1;
+      stroke-dasharray: 4 4;
+    }
+
+    /* Golden ratio overlay hint */
+    .golden-spiral {
+      fill: none;
+      stroke: rgba(56, 189, 248, 0.08);
+      stroke-width: 1.5;
+    }
+
+    /* Scanning line effect */
+    .scan-line {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 240px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.4;
+      animation: scan 4s ease-in-out infinite;
+    }
+
+    @keyframes scan {
+      0%, 100% { top: 20%; opacity: 0; }
+      10% { opacity: 0.4; }
+      90% { opacity: 0.4; }
+      50% { top: 78%; }
+    }
+
+    /* Bottom content */
+    .bottom-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 0 24px 50px;
+    }
+
+    .logo-container {
+      width: 52px;
+      height: 52px;
+      border-radius: 26px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1.5px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      box-shadow: 0 0 30px var(--accent-glow);
+    }
+
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      color: var(--accent);
+      transform: rotate(180deg);
+    }
+
+    .title {
+      font-family: 'Sora', sans-serif;
+      font-size: 52px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -2px;
+      line-height: 1;
+      margin-bottom: 4px;
+      text-shadow: 0 0 40px var(--accent-glow);
+    }
+
+    .title-muted {
+      color: var(--muted);
+      display: block;
+    }
+
+    .subtitle {
+      font-size: 17px;
+      color: #94A3B8;
+      line-height: 1.5;
+      margin-top: 16px;
+      margin-bottom: 28px;
+      max-width: 85%;
+    }
+
+    .cta-button {
+      width: 100%;
+      padding: 18px 24px;
+      background: var(--accent);
+      border: none;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 0 40px var(--accent-glow);
+    }
+
+    .cta-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--bg);
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--emerald);
+      border-radius: 50%;
+    }
+
+    .status-text {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="dynamic-island"></div>
+    <div class="status-bar">
+      <span>15:50</span>
+      <div class="status-icons">
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="white"><path d="M1 4.5C1 3.67 1.67 3 2.5 3h1C4.33 3 5 3.67 5 4.5v6c0 .83-.67 1.5-1.5 1.5h-1C1.67 12 1 11.33 1 10.5v-6zM6 3c0-.83.67-1.5 1.5-1.5h1c.83 0 1.5.67 1.5 1.5v7.5c0 .83-.67 1.5-1.5 1.5h-1C6.67 12 6 11.33 6 10.5V3zM11 1.5c0-.83.67-1.5 1.5-1.5h1c.83 0 1.5.67 1.5 1.5v9c0 .83-.67 1.5-1.5 1.5h-1c-.83 0-1.5-.67-1.5-1.5v-9z"/></svg>
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><path d="M8 2.4c2.2 0 4.2.9 5.6 2.4l1.2-1.2C13 1.8 10.6.8 8 .8S3 1.8 1.2 3.6l1.2 1.2C3.8 3.3 5.8 2.4 8 2.4zm0 3.2c1.3 0 2.5.5 3.4 1.4l1.2-1.2c-1.2-1.2-2.9-2-4.6-2s-3.4.8-4.6 2L4.6 7c.9-.9 2.1-1.4 3.4-1.4zM8 9c.7 0 1.3.3 1.8.8l1.2-1.2c-.8-.8-1.8-1.2-3-1.2s-2.2.4-3 1.2l1.2 1.2c.5-.5 1.1-.8 1.8-.8zm0 1.2c-.7 0-1.2.5-1.2 1.2s.5 1.2 1.2 1.2 1.2-.5 1.2-1.2-.5-1.2-1.2-1.2z"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="white"><rect x="0" y="1" width="22" height="10" rx="3" stroke="white" stroke-width="1" fill="none" opacity="0.4"/><rect x="23" y="4" width="2" height="4" rx="1" fill="white" opacity="0.4"/><rect x="2" y="3" width="18" height="6" rx="1.5" fill="#10B981"/></svg>
+      </div>
+    </div>
+
+    <div class="screen">
+      <div class="bg-gradient"></div>
+      <span class="skip-btn">Skip</span>
+
+      <!-- HERO GRAPHIC -->
+      <div class="hero-container">
+        <div class="hero-graphic">
+          <!-- Analysis rings -->
+          <div class="analysis-ring ring-1"></div>
+          <div class="analysis-ring ring-2"></div>
+          <div class="analysis-ring ring-3"></div>
+          <div class="analysis-ring ring-4"></div>
+          <div class="analysis-ring ring-rotating"></div>
+
+          <!-- Scanning line -->
+          <div class="scan-line"></div>
+
+          <!-- 3D Realistic Face Mesh SVG - Proper Proportions -->
+          <svg class="face-mesh" viewBox="0 0 200 200">
+            <defs>
+              <!-- Face skin gradient for 3D effect -->
+              <radialGradient id="faceGradient" cx="50%" cy="40%" r="55%" fx="40%" fy="35%">
+                <stop offset="0%" stop-color="rgba(56, 189, 248, 0.15)"/>
+                <stop offset="50%" stop-color="rgba(56, 189, 248, 0.08)"/>
+                <stop offset="100%" stop-color="rgba(56, 189, 248, 0.03)"/>
+              </radialGradient>
+              
+              <!-- Inner glow -->
+              <radialGradient id="innerGlow" cx="50%" cy="40%" r="50%">
+                <stop offset="0%" stop-color="rgba(56, 189, 248, 0.1)"/>
+                <stop offset="100%" stop-color="transparent"/>
+              </radialGradient>
+            </defs>
+
+            <!-- Symmetry center line -->
+            <line class="symmetry-line" x1="100" y1="15" x2="100" y2="185"/>
+
+            <!-- FACE OUTLINE - realistic oval, proper width:height ratio -->
+            <ellipse class="face-base" cx="100" cy="100" rx="70" ry="85" 
+                     fill="url(#faceGradient)" 
+                     stroke="rgba(56, 189, 248, 0.35)" 
+                     stroke-width="1.5"/>
+
+            <!-- Hairline curve -->
+            <path class="face-line" d="M 40 55 Q 70 25, 100 22 Q 130 25, 160 55" opacity="0.3"/>
+
+            <!-- Forehead contour -->
+            <path class="face-line" d="M 45 65 Q 100 55, 155 65" opacity="0.25"/>
+
+            <!-- Brow ridge -->
+            <path class="face-line" d="M 40 75 Q 55 70, 70 72" opacity="0.4"/>
+            <path class="face-line" d="M 160 75 Q 145 70, 130 72" opacity="0.4"/>
+
+            <!-- Eye sockets - subtle shadows -->
+            <ellipse cx="65" cy="85" rx="22" ry="12" fill="rgba(0,0,0,0.12)"/>
+            <ellipse cx="135" cy="85" rx="22" ry="12" fill="rgba(0,0,0,0.12)"/>
+
+            <!-- Eyes - almond shape -->
+            <path class="face-line face-line-accent" d="M 48 85 Q 56 78, 65 78 Q 74 78, 82 85 Q 74 91, 65 91 Q 56 91, 48 85"/>
+            <path class="face-line face-line-accent" d="M 118 85 Q 126 78, 135 78 Q 144 78, 152 85 Q 144 91, 135 91 Q 126 91, 118 85"/>
+
+            <!-- Iris circles -->
+            <circle cx="65" cy="85" r="8" fill="none" stroke="rgba(56, 189, 248, 0.25)" stroke-width="1"/>
+            <circle cx="135" cy="85" r="8" fill="none" stroke="rgba(56, 189, 248, 0.25)" stroke-width="1"/>
+
+            <!-- Eyebrows -->
+            <path class="face-line" d="M 42 72 Q 55 66, 65 68 Q 75 70, 82 74" stroke-width="1.5" opacity="0.5"/>
+            <path class="face-line" d="M 158 72 Q 145 66, 135 68 Q 125 70, 118 74" stroke-width="1.5" opacity="0.5"/>
+
+            <!-- Nose bridge -->
+            <path class="face-line" d="M 97 78 Q 95 95, 94 108" opacity="0.3"/>
+            <path class="face-line" d="M 103 78 Q 105 95, 106 108" opacity="0.3"/>
+
+            <!-- Nose tip and wings -->
+            <path class="face-line face-line-accent" d="M 85 115 Q 92 108, 100 107 Q 108 108, 115 115"/>
+            <path class="face-line" d="M 83 118 Q 92 122, 100 120 Q 108 122, 117 118" opacity="0.4"/>
+
+            <!-- Nostrils -->
+            <ellipse cx="90" cy="117" rx="4" ry="2.5" fill="rgba(0,0,0,0.15)"/>
+            <ellipse cx="110" cy="117" rx="4" ry="2.5" fill="rgba(0,0,0,0.15)"/>
+
+            <!-- Philtrum -->
+            <path class="face-line" d="M 97 120 L 97 130" opacity="0.2"/>
+            <path class="face-line" d="M 103 120 L 103 130" opacity="0.2"/>
+
+            <!-- Lips -->
+            <path class="face-line face-line-accent" d="M 78 135 Q 88 131, 100 133 Q 112 131, 122 135"/>
+            <path class="face-line" d="M 80 138 Q 90 145, 100 146 Q 110 145, 120 138" opacity="0.5"/>
+
+            <!-- Cheekbone highlights -->
+            <path class="face-line" d="M 35 90 Q 42 105, 45 120" opacity="0.3"/>
+            <path class="face-line" d="M 165 90 Q 158 105, 155 120" opacity="0.3"/>
+
+            <!-- Cheek hollows -->
+            <ellipse cx="50" cy="115" rx="10" ry="18" fill="rgba(0,0,0,0.06)" transform="rotate(-10 50 115)"/>
+            <ellipse cx="150" cy="115" rx="10" ry="18" fill="rgba(0,0,0,0.06)" transform="rotate(10 150 115)"/>
+
+            <!-- Jawline -->
+            <path class="face-line face-line-accent" d="M 38 130 Q 45 155, 65 170 Q 85 182, 100 185 Q 115 182, 135 170 Q 155 155, 162 130"/>
+
+            <!-- Jaw shadows -->
+            <path d="M 40 135 Q 48 158, 62 168" stroke="rgba(0,0,0,0.1)" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <path d="M 160 135 Q 152 158, 138 168" stroke="rgba(0,0,0,0.1)" stroke-width="6" fill="none" stroke-linecap="round"/>
+
+            <!-- Ear hints -->
+            <path class="face-line" d="M 30 80 Q 25 92, 27 105 Q 28 112, 32 118" opacity="0.25"/>
+            <path class="face-line" d="M 170 80 Q 175 92, 173 105 Q 172 112, 168 118" opacity="0.25"/>
+
+            <!-- MEASUREMENT LINES -->
+            <line class="measure-line" x1="35" y1="85" x2="165" y2="85"/>
+            <line class="measure-line" x1="50" y1="115" x2="150" y2="115"/>
+            <line class="measure-line" x1="55" y1="135" x2="145" y2="135"/>
+
+            <!-- ANALYSIS NODES -->
+            <!-- Hairline -->
+            <circle class="node-pulse" cx="100" cy="18" r="6"/>
+            <circle class="node-key" cx="100" cy="18" r="3"/>
+
+            <!-- Glabella -->
+            <circle class="node" cx="100" cy="75" r="2.5"/>
+
+            <!-- Eye corners -->
+            <circle class="node" cx="48" cy="85" r="2.5"/>
+            <circle class="node" cx="82" cy="85" r="2.5"/>
+            <circle class="node" cx="118" cy="85" r="2.5"/>
+            <circle class="node" cx="152" cy="85" r="2.5"/>
+
+            <!-- Pupil centers -->
+            <circle class="node-outer" cx="65" cy="85" r="6"/>
+            <circle class="node-key" cx="65" cy="85" r="3"/>
+            <circle class="node-outer" cx="135" cy="85" r="6"/>
+            <circle class="node-key" cx="135" cy="85" r="3"/>
+
+            <!-- Brow peaks -->
+            <circle class="node" cx="60" cy="67" r="2"/>
+            <circle class="node" cx="140" cy="67" r="2"/>
+
+            <!-- Nose tip -->
+            <circle class="node-pulse" cx="100" cy="112" r="6"/>
+            <circle class="node-key" cx="100" cy="112" r="3"/>
+
+            <!-- Nose wings -->
+            <circle class="node" cx="85" cy="117" r="2"/>
+            <circle class="node" cx="115" cy="117" r="2"/>
+
+            <!-- Lip corners -->
+            <circle class="node" cx="78" cy="135" r="2.5"/>
+            <circle class="node" cx="122" cy="135" r="2.5"/>
+
+            <!-- Cupid's bow -->
+            <circle class="node-key" cx="100" cy="133" r="2.5"/>
+
+            <!-- Cheekbones -->
+            <circle class="node" cx="38" cy="100" r="2.5"/>
+            <circle class="node" cx="162" cy="100" r="2.5"/>
+
+            <!-- Jaw angles -->
+            <circle class="node" cx="42" cy="145" r="2.5"/>
+            <circle class="node" cx="158" cy="145" r="2.5"/>
+
+            <!-- Chin -->
+            <circle class="node-pulse" cx="100" cy="182" r="6"/>
+            <circle class="node-key" cx="100" cy="182" r="3"/>
+
+            <!-- Gonion (jaw corners) -->
+            <circle class="node" cx="55" cy="165" r="2.5"/>
+            <circle class="node" cx="145" cy="165" r="2.5"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Bottom content -->
+      <div class="bottom-content">
+        <div class="logo-container">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L2 19h20L12 2z"/>
+          </svg>
+        </div>
+
+        <h1 class="title">
+          ASCEND
+          <span class="title-muted">Protocol</span>
+        </h1>
+
+        <p class="subtitle">Quantify your aesthetics. Maximize your genetic potential.</p>
+
+        <button class="cta-button">
+          <span class="cta-text">Begin Analysis</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--bg);">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </button>
+
+        <div class="status-row">
+          <div class="status-dot"></div>
+          <span class="status-text">System Online • v4.2.0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

@@ -1,144 +1,278 @@
-import { StyleSheet, View, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
+import { Ionicons } from '@expo/vector-icons';
+import { AscendColors } from '@/constants/Colors';
+import { useState } from 'react';
+import { useOnboarding } from '@/contexts/OnboardingContext';
 
-export default function SolutionScreen() {
+const focusOptions = [
+  {
+    id: 'jawline',
+    icon: 'triangle',
+    title: 'Jawline & Structure',
+    description: 'Enhance definition and angularity',
+    color: AscendColors.accent,
+  },
+  {
+    id: 'eyes',
+    icon: 'eye',
+    title: 'Eye Area',
+    description: 'Fix tilt, hooding, and circles',
+    color: AscendColors.emerald,
+  },
+  {
+    id: 'skin',
+    icon: 'pulse',
+    title: 'Skin Health',
+    description: 'Texture, tone, and clarity optimization',
+    color: AscendColors.rose,
+  },
+  {
+    id: 'hair',
+    icon: 'layers',
+    title: 'Hair & Grooming',
+    description: 'Style matching and density',
+    color: AscendColors.purple,
+  },
+];
+
+export default function QuizScreen() {
   const router = useRouter();
+  const { setIsOnboarded } = useOnboarding();
+  const [selectedFocus, setSelectedFocus] = useState<string>('');
 
   const handleNext = () => {
-    router.push('/onboarding/features');
+    if (selectedFocus) {
+      router.push('/onboarding/features');
+    }
+  };
+
+  const handleSkip = async () => {
+    await setIsOnboarded(true);
+    router.replace('/(tabs)');
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
+      <StatusBar style="light" />
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView 
-          style={styles.scroll} 
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
+        {/* Top bar with progress */}
+        <View style={styles.topBar}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={28} color={AscendColors.muted} />
+          </TouchableOpacity>
+          
+          <View style={styles.progressContainer}>
+            <View style={styles.progressTrack}>
+              <View style={[styles.progressFill, { width: '25%' }]} />
+            </View>
+          </View>
+          
+          <Text style={styles.progressText}>01/04</Text>
+          
+          <TouchableOpacity onPress={handleSkip} style={styles.skipButton}>
+            <Text style={styles.skipText}>Skip</Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+          {/* Question header */}
           <View style={styles.header}>
-            <MaterialCommunityIcons name="lightbulb-on" size={48} color="#0A7EA4" />
-            <ThemedText type="title" style={styles.title}>
-              Introducing a Better Way
-            </ThemedText>
+            <Text style={styles.title}>Primary Focus</Text>
+            <Text style={styles.subtitle}>
+              Select the metric you want to maximize first.
+            </Text>
           </View>
 
-          <View style={styles.mainFeature}>
-            <ThemedText type="defaultSemiBold" style={styles.mainTitle}>
-              Your App's Core Value
-            </ThemedText>
-            <ThemedText style={styles.mainDescription}>
-              One clear, powerful sentence that explains exactly how you solve the user's problem.
-            </ThemedText>
-          </View>
+          {/* Options list */}
+          <View style={styles.optionsList}>
+            {focusOptions.map((option) => (
+              <TouchableOpacity
+                key={option.id}
+                style={[
+                  styles.option,
+                  selectedFocus === option.id && styles.optionSelected,
+                ]}
+                onPress={() => setSelectedFocus(option.id)}
+              >
+                <View style={[styles.iconContainer, { backgroundColor: AscendColors.bg }]}>
+                  <Ionicons name={option.icon as any} size={24} color={option.color} />
+                </View>
+                
+                <View style={styles.optionText}>
+                  <Text style={styles.optionTitle}>{option.title}</Text>
+                  <Text style={styles.optionDescription}>{option.description}</Text>
+                </View>
 
-          <View style={styles.benefits}>
-            <View style={styles.benefit}>
-              <MaterialCommunityIcons name="check-circle" size={24} color="#0A7EA4" />
-              <ThemedText style={styles.benefitText}>
-                Key benefit or feature that solves their pain
-              </ThemedText>
-            </View>
-            <View style={styles.benefit}>
-              <MaterialCommunityIcons name="check-circle" size={24} color="#0A7EA4" />
-              <ThemedText style={styles.benefitText}>
-                Another important advantage of your solution
-              </ThemedText>
-            </View>
-            <View style={styles.benefit}>
-              <MaterialCommunityIcons name="check-circle" size={24} color="#0A7EA4" />
-              <ThemedText style={styles.benefitText}>
-                A third compelling reason to use your app
-              </ThemedText>
-            </View>
+                <View
+                  style={[
+                    styles.checkCircle,
+                    selectedFocus === option.id && styles.checkCircleSelected,
+                  ]}
+                >
+                  {selectedFocus === option.id && (
+                    <Ionicons name="checkmark" size={16} color={AscendColors.accent} />
+                  )}
+                </View>
+              </TouchableOpacity>
+            ))}
           </View>
         </ScrollView>
 
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={handleNext}>
-            <ThemedText type="defaultSemiBold" style={styles.buttonText}>
-              Show Me How
-            </ThemedText>
+        {/* Footer */}
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={[styles.button, !selectedFocus && styles.buttonDisabled]}
+            onPress={handleNext}
+            disabled={!selectedFocus}
+          >
+            <Text style={styles.buttonText}>Continue</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
-    </ThemedView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: AscendColors.bg,
   },
   safeArea: {
     flex: 1,
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 48,
+    paddingBottom: 16,
+    gap: 16,
+  },
+  skipButton: {
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+  },
+  skipText: {
+    fontSize: 16,
+    color: AscendColors.accent,
+    fontWeight: '600',
+  },
+  progressContainer: {
+    flex: 1,
+    marginHorizontal: 16,
+  },
+  progressTrack: {
+    height: 4,
+    backgroundColor: AscendColors.border,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: AscendColors.accent,
+  },
+  progressText: {
+    fontSize: 12,
+    fontFamily: 'monospace',
+    color: AscendColors.muted,
   },
   scroll: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 16,
-    gap: 24,
+    paddingBottom: 24,
   },
   header: {
-    alignItems: 'center',
-    gap: 16,
+    marginBottom: 32,
+    marginTop: 16,
   },
   title: {
     fontSize: 32,
-    textAlign: 'center',
+    fontWeight: '700',
+    color: AscendColors.text,
+    marginBottom: 12,
   },
-  mainFeature: {
-    backgroundColor: '#0A7EA410',
-    padding: 24,
-    borderRadius: 20,
-    gap: 8,
-  },
-  mainTitle: {
-    fontSize: 22,
-    textAlign: 'center',
-  },
-  mainDescription: {
+  subtitle: {
     fontSize: 16,
-    opacity: 0.7,
-    textAlign: 'center',
-    lineHeight: 22,
+    color: AscendColors.muted,
   },
-  benefits: {
-    gap: 12,
+  optionsList: {
+    gap: 16,
   },
-  benefit: {
+  option: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    backgroundColor: '#0A7EA408',
     padding: 16,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: AscendColors.border,
+    backgroundColor: AscendColors.card,
+    gap: 16,
   },
-  benefitText: {
+  optionSelected: {
+    borderColor: AscendColors.accent,
+    backgroundColor: 'rgba(56, 189, 248, 0.05)',
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: AscendColors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  optionText: {
     flex: 1,
-    fontSize: 16,
-    lineHeight: 22,
   },
-  buttonContainer: {
-    paddingHorizontal: 24,
-    paddingVertical: 16,
+  optionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: AscendColors.text,
+    marginBottom: 4,
+  },
+  optionDescription: {
+    fontSize: 12,
+    color: AscendColors.muted,
+  },
+  checkCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: AscendColors.border,
+    backgroundColor: AscendColors.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkCircleSelected: {
+    borderColor: AscendColors.accent,
+  },
+  footer: {
+    padding: 24,
   },
   button: {
-    backgroundColor: '#0A7EA4',
-    padding: 20,
-    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 16,
+    borderRadius: 12,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  buttonDisabled: {
+    opacity: 0.5,
   },
   buttonText: {
-    color: 'white',
+    color: AscendColors.bg,
     fontSize: 18,
+    fontWeight: '700',
   },
-}); 
+});

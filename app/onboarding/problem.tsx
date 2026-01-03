@@ -1,150 +1,290 @@
-import { StyleSheet, View, ScrollView } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
+import { Ionicons } from '@expo/vector-icons';
+import { AscendColors } from '@/constants/Colors';
+import { useState, useEffect } from 'react';
+import { useOnboarding } from '@/contexts/OnboardingContext';
 
-export default function ProblemScreen() {
+export default function ProfileCardScreen() {
   const router = useRouter();
+  const { setIsOnboarded, userData } = useOnboarding();
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress(prev => (prev < 33 ? prev + 1 : 33));
+    }, 30);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleNext = () => {
-    router.push('/onboarding/solution');
+    router.push('/onboarding/quiz-1-gender');
+  };
+
+  const handleSkip = async () => {
+    await setIsOnboarded(true);
+    router.replace('/(tabs)');
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
+      <StatusBar style="light" />
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView 
-          style={styles.scroll} 
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
+        {/* Skip button */}
+        <View style={styles.topBar}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={28} color={AscendColors.muted} />
+          </TouchableOpacity>
+          <View style={{ flex: 1 }} />
+          <TouchableOpacity onPress={handleSkip} style={styles.skipButton}>
+            <Text style={styles.skipText}>Skip</Text>
+          </TouchableOpacity>
+        </View>
+        
+        <View style={styles.content}>
+          {/* Header */}
           <View style={styles.header}>
-            <ThemedText type="title" style={styles.title}>
-              The Problem
-            </ThemedText>
-            <ThemedText style={styles.description}>
-              Describe the main challenge or pain point your users face. Make it relatable and specific.
-            </ThemedText>
+            <Text style={styles.headerTitle}>Let's Ascend.</Text>
+            <Text style={styles.headerSubtitle}>
+              Initializing your digital phenotype profile.
+            </Text>
           </View>
 
-          <View style={styles.content}>
-            <View style={styles.example}>
-              <MaterialCommunityIcons name="alert-circle" size={32} color="#0A7EA4" />
-              <ThemedText style={styles.exampleText}>
-                "I struggle with X every day, and it costs me Y hours per week..."
-              </ThemedText>
+          {/* Profile Card */}
+          <View style={styles.card}>
+            {/* Background pattern overlay */}
+            <View style={styles.cardPattern} />
+            
+            {/* QR Code placeholder in corner */}
+            <View style={styles.qrCorner}>
+              <Ionicons name="qr-code" size={40} color={AscendColors.border} />
             </View>
 
-            <View style={styles.points}>
-              <View style={styles.point}>
-                <MaterialCommunityIcons name="close" size={24} color="#E11D48" />
-                <ThemedText style={styles.pointText}>
-                  Current solutions are expensive and complex
-                </ThemedText>
+            {/* Avatar placeholder */}
+            <View style={styles.avatarContainer}>
+              <View style={styles.avatar}>
+                <Ionicons name="person" size={48} color={AscendColors.muted} />
+                <View style={styles.loadingRing} />
               </View>
-              <View style={styles.point}>
-                <MaterialCommunityIcons name="close" size={24} color="#E11D48" />
-                <ThemedText style={styles.pointText}>
-                  Users waste time on manual workarounds
-                </ThemedText>
+            </View>
+
+            {/* User details */}
+            <View style={styles.details}>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Subject ID</Text>
+                <Text style={styles.detailValue}>{userData?.name ? userData.name.toUpperCase() : '#USER-8842'}</Text>
               </View>
-              <View style={styles.point}>
-                <MaterialCommunityIcons name="close" size={24} color="#E11D48" />
-                <ThemedText style={styles.pointText}>
-                  Existing tools lack key features
-                </ThemedText>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Status</Text>
+                <View style={styles.statusBadge}>
+                  <Text style={styles.statusText}>UNVERIFIED</Text>
+                </View>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Potential</Text>
+                <Text style={styles.detailCalculating}>CALCULATING...</Text>
+              </View>
+            </View>
+
+            {/* Footer */}
+            <View style={styles.cardFooter}>
+              <View style={styles.progressBar}>
+                <View style={[styles.progressFill, { width: `${progress}%` }]} />
+              </View>
+              <View style={styles.footerInfo}>
+                <Text style={styles.footerLabel}>DATA ENCRYPTION</Text>
+                <Text style={styles.footerStatus}>ACTIVE</Text>
               </View>
             </View>
           </View>
-        </ScrollView>
 
-        <View style={styles.buttonContainer}>
+          {/* Continue button */}
           <TouchableOpacity style={styles.button} onPress={handleNext}>
-            <ThemedText type="defaultSemiBold" style={styles.buttonText}>
-              See the Solution
-            </ThemedText>
+            <Text style={styles.buttonText}>Initialize Quiz</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
-    </ThemedView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: AscendColors.bg,
   },
   safeArea: {
     flex: 1,
   },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 24,
-    paddingTop: 24,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
-  header: {
-    gap: 8,
-    marginBottom: 32,
+  skipButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
-  title: {
-    fontSize: 36,
-  },
-  description: {
+  skipText: {
     fontSize: 16,
-    opacity: 0.7,
-    lineHeight: 22,
+    color: AscendColors.accent,
+    fontWeight: '600',
   },
   content: {
-    gap: 24,
-  },
-  example: {
-    backgroundColor: '#0A7EA410',
-    padding: 16,
-    borderRadius: 16,
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'center',
-  },
-  exampleText: {
     flex: 1,
-    fontSize: 16,
-    fontStyle: 'italic',
-    lineHeight: 22,
-  },
-  points: {
-    gap: 12,
-  },
-  point: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: '#E11D4810',
-    padding: 14,
-    borderRadius: 12,
-  },
-  pointText: {
-    flex: 1,
-    fontSize: 15,
-    lineHeight: 20,
-  },
-  buttonContainer: {
     paddingHorizontal: 24,
-    paddingVertical: 12,
+    paddingTop: 24,
+    paddingBottom: 32,
+  },
+  header: {
+    marginBottom: 40,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: AscendColors.text,
+    marginBottom: 8,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: AscendColors.muted,
+  },
+  card: {
+    backgroundColor: AscendColors.card,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: AscendColors.border,
+    padding: 24,
+    alignItems: 'center',
+    marginBottom: 32,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  cardPattern: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0.05,
+  },
+  qrCorner: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    opacity: 0.5,
+  },
+  avatarContainer: {
+    marginTop: 32,
+    marginBottom: 24,
+  },
+  avatar: {
+    width: 128,
+    height: 128,
+    borderRadius: 64,
+    backgroundColor: AscendColors.bg,
+    borderWidth: 2,
+    borderColor: AscendColors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  loadingRing: {
+    position: 'absolute',
+    top: -4,
+    left: -4,
+    right: -4,
+    bottom: -4,
+    borderRadius: 68,
+    borderWidth: 2,
+    borderColor: AscendColors.accent,
+    borderTopColor: 'transparent',
+  },
+  details: {
+    width: '100%',
+    gap: 16,
+    zIndex: 10,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: AscendColors.border,
+  },
+  detailLabel: {
+    fontSize: 12,
+    color: AscendColors.muted,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  detailValue: {
+    fontSize: 14,
+    color: AscendColors.accent,
+    fontWeight: '600',
+    fontFamily: 'monospace',
+  },
+  statusBadge: {
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  statusText: {
+    fontSize: 12,
+    color: AscendColors.amber,
+    fontWeight: '700',
+  },
+  detailCalculating: {
+    fontSize: 12,
+    color: '#64748B',
+  },
+  cardFooter: {
+    width: '100%',
+    marginTop: 16,
+  },
+  progressBar: {
+    height: 4,
+    backgroundColor: AscendColors.bg,
+    borderRadius: 2,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: AscendColors.accent,
+  },
+  footerInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  footerLabel: {
+    fontSize: 10,
+    color: AscendColors.muted,
+  },
+  footerStatus: {
+    fontSize: 10,
+    color: AscendColors.accent,
   },
   button: {
-    backgroundColor: '#0A7EA4',
-    padding: 16,
-    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 16,
+    borderRadius: 12,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   buttonText: {
-    color: 'white',
-    fontSize: 17,
+    color: AscendColors.bg,
+    fontSize: 18,
+    fontWeight: '700',
   },
-}); 
+});

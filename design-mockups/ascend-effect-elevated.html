@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Ascend Effect - Elevated UI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0B0F17;
+      --card: #151B28;
+      --card-elevated: #1A2234;
+      --accent: #38BDF8;
+      --accent-glow: rgba(56, 189, 248, 0.4);
+      --text: #F1F5F9;
+      --muted: #64748B;
+      --border: #1E293B;
+      --emerald: #10B981;
+      --amber: #F59E0B;
+      --gradient-1: #0EA5E9;
+      --gradient-2: #38BDF8;
+      --gradient-3: #7DD3FC;
+    }
+
+    body {
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .phone-frame {
+      width: 390px;
+      height: 844px;
+      background: var(--bg);
+      border-radius: 48px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 
+        0 0 0 12px #1a1a1a,
+        0 0 0 14px #333,
+        0 50px 100px rgba(0,0,0,0.5);
+    }
+
+    .screen {
+      width: 100%;
+      height: 100%;
+      padding: 60px 24px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animated background gradients */
+    .bg-gradient-1 {
+      position: absolute;
+      top: -150px;
+      left: -100px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
+      animation: float1 8s ease-in-out infinite;
+    }
+
+    .bg-gradient-2 {
+      position: absolute;
+      bottom: 100px;
+      right: -150px;
+      width: 350px;
+      height: 350px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+      animation: float2 10s ease-in-out infinite;
+    }
+
+    .bg-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 400px;
+      background-image: 
+        linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%);
+    }
+
+    @keyframes float1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, 20px) scale(1.1); }
+    }
+
+    @keyframes float2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(-20px, -30px) scale(1.05); }
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(56, 189, 248, 0.05));
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 100px;
+      padding: 6px 14px;
+      margin-bottom: 16px;
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--emerald);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .title {
+      font-family: 'Sora', sans-serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.5;
+      max-width: 280px;
+      margin: 0 auto;
+    }
+
+    /* PSL Score Card */
+    .score-card {
+      background: linear-gradient(145deg, var(--card-elevated) 0%, var(--card) 100%);
+      border-radius: 24px;
+      padding: 24px;
+      border: 1px solid rgba(255,255,255,0.05);
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .score-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.5), transparent);
+    }
+
+    .score-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .score-label {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .score-uplift {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 6px 12px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--emerald);
+    }
+
+    .score-uplift svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* 3D Bar Chart */
+    .chart-container {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      align-items: flex-end;
+      height: 180px;
+      padding: 0 20px;
+    }
+
+    .bar-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .bar-wrapper {
+      position: relative;
+      width: 72px;
+      height: 140px;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .bar {
+      width: 100%;
+      border-radius: 16px 16px 8px 8px;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .bar-average {
+      height: 70px;
+      background: linear-gradient(180deg, #3E4A5C 0%, #2A3441 100%);
+      box-shadow: 
+        inset 0 1px 0 rgba(255,255,255,0.1),
+        0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .bar-you {
+      height: 120px;
+      background: linear-gradient(180deg, var(--gradient-3) 0%, var(--gradient-1) 100%);
+      box-shadow: 
+        inset 0 1px 0 rgba(255,255,255,0.3),
+        0 0 30px var(--accent-glow),
+        0 4px 20px rgba(56, 189, 248, 0.4);
+    }
+
+    .bar-you::before {
+      content: '';
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 6px;
+      background: rgba(255,255,255,0.4);
+      border-radius: 3px;
+    }
+
+    /* Animated particles on the "You" bar */
+    .bar-you::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(180deg, transparent 60%, rgba(255,255,255,0.1) 100%);
+      border-radius: inherit;
+    }
+
+    .bar-value {
+      position: absolute;
+      top: -32px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .bar-value-you {
+      color: var(--accent);
+      text-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .bar-label {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .bar-label-you {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Score difference indicator */
+    .score-diff {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .diff-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+
+    .diff-badge {
+      font-size: 11px;
+      color: var(--muted);
+      padding: 4px 10px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 6px;
+    }
+
+    /* Testimonial Card */
+    .testimonial-card {
+      background: linear-gradient(145deg, var(--card-elevated) 0%, var(--card) 100%);
+      border-radius: 24px;
+      padding: 24px;
+      border: 1px solid rgba(255,255,255,0.05);
+      position: relative;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .testimonial-card::before {
+      content: '"';
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 120px;
+      font-family: Georgia, serif;
+      color: rgba(56, 189, 248, 0.05);
+      line-height: 1;
+    }
+
+    .stars {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+    }
+
+    .star {
+      width: 18px;
+      height: 18px;
+      color: #FCD34D;
+      filter: drop-shadow(0 0 4px rgba(252, 211, 77, 0.4));
+    }
+
+    .testimonial-text {
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--text);
+      font-style: italic;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .author-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--gradient-1) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--bg);
+      font-size: 16px;
+      box-shadow: 0 0 20px var(--accent-glow);
+      position: relative;
+    }
+
+    .author-avatar::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      background: linear-gradient(135deg, var(--accent), transparent) border-box;
+      -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+
+    .author-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .author-name {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .author-meta {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .author-verified {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--emerald);
+      margin-left: auto;
+      background: rgba(16, 185, 129, 0.1);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    /* CTA Button */
+    .cta-button {
+      margin-top: 24px;
+      width: 100%;
+      padding: 18px 24px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--gradient-1) 100%);
+      border: none;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 
+        0 0 40px var(--accent-glow),
+        0 4px 20px rgba(56, 189, 248, 0.3);
+    }
+
+    .cta-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { left: -100%; }
+      50% { left: 100%; }
+    }
+
+    .cta-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--bg);
+      letter-spacing: 0.5px;
+    }
+
+    .cta-arrow {
+      width: 20px;
+      height: 20px;
+      color: var(--bg);
+    }
+
+    /* Dynamic Island */
+    .dynamic-island {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 34px;
+      background: #000;
+      border-radius: 20px;
+    }
+
+    /* Status bar */
+    .status-bar {
+      position: absolute;
+      top: 16px;
+      left: 32px;
+      right: 32px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .status-icons {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="dynamic-island"></div>
+    <div class="status-bar">
+      <span>14:37</span>
+      <div class="status-icons">
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="white">
+          <path d="M1 4.5C1 3.67 1.67 3 2.5 3h1C4.33 3 5 3.67 5 4.5v6c0 .83-.67 1.5-1.5 1.5h-1C1.67 12 1 11.33 1 10.5v-6zM6 3c0-.83.67-1.5 1.5-1.5h1c.83 0 1.5.67 1.5 1.5v7.5c0 .83-.67 1.5-1.5 1.5h-1C6.67 12 6 11.33 6 10.5V3zM11 1.5c0-.83.67-1.5 1.5-1.5h1c.83 0 1.5.67 1.5 1.5v9c0 .83-.67 1.5-1.5 1.5h-1c-.83 0-1.5-.67-1.5-1.5v-9z"/>
+        </svg>
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="white">
+          <path d="M8 2.4c2.2 0 4.2.9 5.6 2.4l1.2-1.2C13 1.8 10.6.8 8 .8S3 1.8 1.2 3.6l1.2 1.2C3.8 3.3 5.8 2.4 8 2.4zm0 3.2c1.3 0 2.5.5 3.4 1.4l1.2-1.2c-1.2-1.2-2.9-2-4.6-2s-3.4.8-4.6 2L4.6 7c.9-.9 2.1-1.4 3.4-1.4zM8 9c.7 0 1.3.3 1.8.8l1.2-1.2c-.8-.8-1.8-1.2-3-1.2s-2.2.4-3 1.2l1.2 1.2c.5-.5 1.1-.8 1.8-.8zm0 1.2c-.7 0-1.2.5-1.2 1.2s.5 1.2 1.2 1.2 1.2-.5 1.2-1.2-.5-1.2-1.2-1.2z"/>
+        </svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="white">
+          <rect x="0" y="1" width="22" height="10" rx="3" stroke="white" stroke-width="1" fill="none" opacity="0.4"/>
+          <rect x="23" y="4" width="2" height="4" rx="1" fill="white" opacity="0.4"/>
+          <rect x="2" y="3" width="18" height="6" rx="1.5" fill="#10B981"/>
+        </svg>
+      </div>
+    </div>
+    
+    <div class="screen">
+      <!-- Background effects -->
+      <div class="bg-gradient-1"></div>
+      <div class="bg-gradient-2"></div>
+      <div class="bg-grid"></div>
+      
+      <div class="content">
+        <!-- Header -->
+        <div class="header">
+          <div class="badge">
+            <span class="badge-dot"></span>
+            Analysis Complete
+          </div>
+          <h1 class="title">The Ascend Effect</h1>
+          <p class="subtitle">After 60 days, your transformation trajectory based on protocol adherence</p>
+        </div>
+        
+        <!-- PSL Score Card -->
+        <div class="score-card">
+          <div class="score-header">
+            <span class="score-label">Projected PSL Score Uplift</span>
+            <div class="score-uplift">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <path d="M12 19V5M5 12l7-7 7 7"/>
+              </svg>
+              +42%
+            </div>
+          </div>
+          
+          <div class="chart-container">
+            <div class="bar-group">
+              <div class="bar-wrapper">
+                <span class="bar-value">5.2</span>
+                <div class="bar bar-average"></div>
+              </div>
+              <span class="bar-label">Average</span>
+            </div>
+            
+            <div class="bar-group">
+              <div class="bar-wrapper">
+                <span class="bar-value bar-value-you">7.4</span>
+                <div class="bar bar-you"></div>
+              </div>
+              <span class="bar-label bar-label-you">You</span>
+            </div>
+          </div>
+          
+          <div class="score-diff">
+            <div class="diff-line"></div>
+            <span class="diff-badge">+2.2 PSL points potential</span>
+            <div class="diff-line"></div>
+          </div>
+        </div>
+        
+        <!-- Testimonial -->
+        <div class="testimonial-card">
+          <div class="stars">
+            <svg class="star" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <svg class="star" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <svg class="star" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <svg class="star" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <svg class="star" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          </div>
+          
+          <p class="testimonial-text">"I didn't think it was possible. My jawline is sharper, my skin is clearer. People treat me differently now."</p>
+          
+          <div class="testimonial-author">
+            <div class="author-avatar">J</div>
+            <div class="author-info">
+              <span class="author-name">Jordan</span>
+              <span class="author-meta">Member since 2024</span>
+            </div>
+            <div class="author-verified">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+              </svg>
+              Verified
+            </div>
+          </div>
+        </div>
+        
+        <!-- CTA Button -->
+        <button class="cta-button">
+          <span class="cta-text">See Analysis</span>
+          <svg class="cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

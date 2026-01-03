@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Ascend Effect - V2 Orbital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0B0F17;
+      --card: #151B28;
+      --card-elevated: #1A2234;
+      --accent: #38BDF8;
+      --accent-glow: rgba(56, 189, 248, 0.4);
+      --text: #F1F5F9;
+      --muted: #64748B;
+      --border: #1E293B;
+      --emerald: #10B981;
+      --amber: #F59E0B;
+      --gradient-1: #0EA5E9;
+      --gradient-2: #38BDF8;
+      --gradient-3: #7DD3FC;
+    }
+
+    body {
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .phone-frame {
+      width: 390px;
+      height: 844px;
+      background: var(--bg);
+      border-radius: 48px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 
+        0 0 0 12px #1a1a1a,
+        0 0 0 14px #333,
+        0 50px 100px rgba(0,0,0,0.5);
+    }
+
+    .screen {
+      width: 100%;
+      height: 100%;
+      padding: 60px 24px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animated background gradients */
+    .bg-gradient-1 {
+      position: absolute;
+      top: -150px;
+      left: -100px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.12) 0%, transparent 70%);
+      animation: float1 8s ease-in-out infinite;
+    }
+
+    .bg-gradient-2 {
+      position: absolute;
+      bottom: 100px;
+      right: -150px;
+      width: 350px;
+      height: 350px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+      animation: float2 10s ease-in-out infinite;
+    }
+
+    @keyframes float1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, 20px) scale(1.1); }
+    }
+
+    @keyframes float2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(-20px, -30px) scale(1.05); }
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(56, 189, 248, 0.05));
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 100px;
+      padding: 6px 14px;
+      margin-bottom: 16px;
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--emerald);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .title {
+      font-family: 'Sora', sans-serif;
+      font-size: 34px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.5;
+      max-width: 280px;
+      margin: 0 auto;
+    }
+
+    /* Orbital Visualization Card */
+    .orbital-card {
+      background: linear-gradient(145deg, var(--card-elevated) 0%, var(--card) 100%);
+      border-radius: 24px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.05);
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .orbital-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.5), transparent);
+    }
+
+    .orbital-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .orbital-label {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .score-uplift {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 6px 12px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--emerald);
+    }
+
+    /* ORBITAL VISUALIZATION */
+    .orbital-container {
+      position: relative;
+      width: 280px;
+      height: 280px;
+      margin: 0 auto;
+    }
+
+    /* Concentric orbit rings */
+    .orbit-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.05);
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .orbit-ring-1 { width: 80px; height: 80px; }
+    .orbit-ring-2 { width: 130px; height: 130px; }
+    .orbit-ring-3 { width: 180px; height: 180px; border-color: rgba(255,255,255,0.08); }
+    .orbit-ring-4 { width: 230px; height: 230px; }
+    .orbit-ring-5 { 
+      width: 270px; 
+      height: 270px; 
+      border: 2px solid transparent;
+      background: linear-gradient(var(--card), var(--card)) padding-box,
+                  linear-gradient(135deg, rgba(56, 189, 248, 0.4), transparent, rgba(16, 185, 129, 0.3)) border-box;
+    }
+
+    /* Center core */
+    .orbital-core {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #2A3441 0%, #1a2130 100%);
+      box-shadow: 
+        inset 0 2px 4px rgba(255,255,255,0.1),
+        0 0 30px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .core-score {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--muted);
+      line-height: 1;
+    }
+
+    .core-label {
+      font-size: 8px;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 2px;
+    }
+
+    /* Average marker - stuck in lower orbit */
+    .average-marker {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 130px;
+      height: 130px;
+      transform: translate(-50%, -50%);
+      animation: none;
+    }
+
+    .average-dot {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, #475569 0%, #334155 100%);
+      border-radius: 50%;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 0 15px rgba(71, 85, 105, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .average-dot::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: #64748B;
+      border-radius: 50%;
+    }
+
+    .average-label {
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: #64748B;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+
+    .average-score-label {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      color: #64748B;
+      font-weight: 600;
+    }
+
+    /* Trajectory arc - the "ascension path" */
+    .trajectory-arc {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 200px;
+      height: 200px;
+      transform: translate(-50%, -50%) rotate(-90deg);
+    }
+
+    .trajectory-path {
+      fill: none;
+      stroke: url(#trajectoryGradient);
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-dasharray: 180;
+      stroke-dashoffset: 0;
+      filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
+    }
+
+    /* Animated particles along trajectory */
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent);
+      animation: particleMove 3s ease-in-out infinite;
+    }
+
+    .particle-1 { animation-delay: 0s; }
+    .particle-2 { animation-delay: 0.5s; }
+    .particle-3 { animation-delay: 1s; }
+
+    @keyframes particleMove {
+      0% {
+        offset-distance: 0%;
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        offset-distance: 100%;
+        opacity: 0;
+      }
+    }
+
+    /* "You" marker - in higher orbit with glow */
+    .you-marker {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 230px;
+      height: 230px;
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    .you-dot {
+      position: absolute;
+      width: 44px;
+      height: 44px;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .you-dot-inner {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--gradient-3) 0%, var(--gradient-1) 100%);
+      border-radius: 50%;
+      box-shadow: 
+        0 0 30px var(--accent-glow),
+        0 0 60px rgba(56, 189, 248, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      animation: youPulse 2s ease-in-out infinite;
+    }
+
+    .you-dot-inner::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid rgba(56, 189, 248, 0.3);
+      animation: youRing 2s ease-in-out infinite;
+    }
+
+    .you-dot-inner::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 0 10px white;
+    }
+
+    @keyframes youPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    @keyframes youRing {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.3); opacity: 0; }
+    }
+
+    .you-label {
+      position: absolute;
+      top: -52px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-45deg);
+      font-size: 11px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .you-score-label {
+      position: absolute;
+      top: 22px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-45deg);
+      font-size: 16px;
+      color: var(--accent);
+      font-weight: 700;
+      text-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    /* Score legend */
+    .orbital-legend {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .legend-dot-avg {
+      background: #475569;
+    }
+
+    .legend-dot-you {
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .legend-text {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .legend-score {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .legend-score-you {
+      color: var(--accent);
+    }
+
+    /* Testimonial Card */
+    .testimonial-card {
+      background: linear-gradient(145deg, var(--card-elevated) 0%, var(--card) 100%);
+      border-radius: 24px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.05);
+      position: relative;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .testimonial-card::before {
+      content: '"';
+      position: absolute;
+      top: 5px;
+      right: 16px;
+      font-size: 100px;
+      font-family: Georgia, serif;
+      color: rgba(56, 189, 248, 0.05);
+      line-height: 1;
+    }
+
+    .stars {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+
+    .star {
+      width: 16px;
+      height: 16px;
+      color: #FCD34D;
+      filter: drop-shadow(0 0 4px rgba(252, 211, 77, 0.4));
+    }
+
+    .testimonial-text {
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--text);
+      font-style: italic;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .author-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--gradient-1) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--bg);
+      font-size: 14px;
+      box-shadow: 0 0 20px var(--accent-glow);
+      position: relative;
+    }
+
+    .author-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .author-name {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .author-meta {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .author-verified {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      color: var(--emerald);
+      margin-left: auto;
+      background: rgba(16, 185, 129, 0.1);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    /* CTA Button */
+    .cta-button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 18px 24px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--gradient-1) 100%);
+      border: none;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 
+        0 0 40px var(--accent-glow),
+        0 4px 20px rgba(56, 189, 248, 0.3);
+    }
+
+    .cta-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { left: -100%; }
+      50% { left: 100%; }
+    }
+
+    .cta-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--bg);
+      letter-spacing: 0.5px;
+    }
+
+    .cta-arrow {
+      width: 20px;
+      height: 20px;
+      color: var(--bg);
+    }
+
+    /* Dynamic Island */
+    .dynamic-island {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 34px;
+      background: #000;
+      border-radius: 20px;
+      z-index: 100;
+    }
+
+    /* Status bar */
+    .status-bar {
+      position: absolute;
+      top: 16px;
+      left: 32px;
+      right: 32px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      z-index: 100;
+    }
+
+    .status-icons {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    /* SVG Definitions */
+    .svg-defs {
+      position: absolute;
+      width: 0;
+      height: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- SVG Definitions -->
+  <svg class="svg-defs">
+    <defs>
+      <linearGradient id="trajectoryGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style="stop-color:#475569;stop-opacity:0.3" />
+        <stop offset="50%" style="stop-color:#38BDF8;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#10B981;stop-opacity:0.8" />
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <div class="phone-frame">
+    <div class="dynamic-island"></div>
+    <div class="status-bar">
+      <span>14:37</span>
+      <div class="status-icons">
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="white">
+          <path d="M1 4.5C1 3.67 1.67 3 2.5 3h1C4.33 3 5 3.67 5 4.5v6c0 .83-.67 1.5-1.5 1.5h-1C1.67 12 1 11.33 1 10.5v-6zM6 3c0-.83.67-1.5 1.5-1.5h1c.83 0 1.5.67 1.5 1.5v7.5c0 .83-.67 1.5-1.5 1.5h-1C6.67 12 6 11.33 6 10.5V3zM11 1.5c0-.83.67-1.5 1.5-1.5h1c.83 0 1.5.67 1.5 1.5v9c0 .83-.67 1.5-1.5 1.5h-1c-.83 0-1.5-.67-1.5-1.5v-9z"/>
+        </svg>
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="white">
+          <path d="M8 2.4c2.2 0 4.2.9 5.6 2.4l1.2-1.2C13 1.8 10.6.8 8 .8S3 1.8 1.2 3.6l1.2 1.2C3.8 3.3 5.8 2.4 8 2.4zm0 3.2c1.3 0 2.5.5 3.4 1.4l1.2-1.2c-1.2-1.2-2.9-2-4.6-2s-3.4.8-4.6 2L4.6 7c.9-.9 2.1-1.4 3.4-1.4zM8 9c.7 0 1.3.3 1.8.8l1.2-1.2c-.8-.8-1.8-1.2-3-1.2s-2.2.4-3 1.2l1.2 1.2c.5-.5 1.1-.8 1.8-.8zm0 1.2c-.7 0-1.2.5-1.2 1.2s.5 1.2 1.2 1.2 1.2-.5 1.2-1.2-.5-1.2-1.2-1.2z"/>
+        </svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="white">
+          <rect x="0" y="1" width="22" height="10" rx="3" stroke="white" stroke-width="1" fill="none" opacity="0.4"/>
+          <rect x="23" y="4" width="2" height="4" rx="1" fill="white" opacity="0.4"/>
+          <rect x="2" y="3" width="18" height="6" rx="1.5" fill="#10B981"/>
+        </svg>
+      </div>
+    </div>
+    
+    <div class="screen">
+      <!-- Background effects -->
+      <div class="bg-gradient-1"></div>
+      <div class="bg-gradient-2"></div>
+      
+      <div class="content">
+        <!-- Header -->
+        <div class="header">
+          <div class="badge">
+            <span class="badge-dot"></span>
+            Analysis Complete
+          </div>
+          <h1 class="title">The Ascend Effect</h1>
+          <p class="subtitle">Your 60-day transformation trajectory</p>
+        </div>
+        
+        <!-- Orbital Visualization -->
+        <div class="orbital-card">
+          <div class="orbital-header">
+            <span class="orbital-label">Projected PSL Ascension</span>
+            <div class="score-uplift">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <path d="M12 19V5M5 12l7-7 7 7"/>
+              </svg>
+              +42%
+            </div>
+          </div>
+          
+          <div class="orbital-container">
+            <!-- Orbit rings -->
+            <div class="orbit-ring orbit-ring-1"></div>
+            <div class="orbit-ring orbit-ring-2"></div>
+            <div class="orbit-ring orbit-ring-3"></div>
+            <div class="orbit-ring orbit-ring-4"></div>
+            <div class="orbit-ring orbit-ring-5"></div>
+            
+            <!-- Center core showing baseline -->
+            <div class="orbital-core">
+              <span class="core-score">5.2</span>
+              <span class="core-label">Base</span>
+            </div>
+            
+            <!-- Average marker in lower orbit -->
+            <div class="average-marker">
+              <div class="average-label">Average</div>
+              <div class="average-dot"></div>
+              <div class="average-score-label">5.2</div>
+            </div>
+            
+            <!-- Trajectory arc -->
+            <svg class="trajectory-arc" viewBox="0 0 200 200">
+              <path class="trajectory-path" d="M 100 15 A 85 85 0 0 1 185 100" />
+            </svg>
+            
+            <!-- "You" marker in higher orbit -->
+            <div class="you-marker">
+              <div class="you-label">You · 60 days</div>
+              <div class="you-dot">
+                <div class="you-dot-inner"></div>
+              </div>
+              <div class="you-score-label">7.4</div>
+            </div>
+          </div>
+          
+          <div class="orbital-legend">
+            <div class="legend-item">
+              <div class="legend-dot legend-dot-avg"></div>
+              <span class="legend-text">Average: <span class="legend-score">5.2</span></span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot legend-dot-you"></div>
+              <span class="legend-text">You: <span class="legend-score legend-score-you">7.4</span></span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Testimonial -->
+        <div class="testimonial-card">
+          <div class="stars">
+            <svg class="star" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <svg class="star" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <svg class="star" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <svg class="star" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <svg class="star" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          </div>
+          
+          <p class="testimonial-text">"I didn't think it was possible. My jawline is sharper, my skin is clearer. People treat me differently now."</p>
+          
+          <div class="testimonial-author">
+            <div class="author-avatar">J</div>
+            <div class="author-info">
+              <span class="author-name">Jordan</span>
+              <span class="author-meta">Member since 2024</span>
+            </div>
+            <div class="author-verified">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+              </svg>
+              Verified
+            </div>
+          </div>
+        </div>
+        
+        <!-- CTA Button -->
+        <button class="cta-button">
+          <span class="cta-text">See Analysis</span>
+          <svg class="cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
