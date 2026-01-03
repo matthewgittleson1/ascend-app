@@ -45,8 +45,9 @@ export default function FaceScanFrontScreen() {
         mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [3, 4],
-        quality: 0.8,
+        quality: 0.3, // Compressed for API upload (keeps under 4.5MB Edge limit)
         base64: true,
+        exif: false,
       });
 
       if (!result.canceled && result.assets[0]) {
@@ -84,8 +85,9 @@ export default function FaceScanFrontScreen() {
         mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [3, 4],
-        quality: 0.8,
+        quality: 0.3,
         base64: true,
+        exif: false,
       });
 
       if (!result.canceled && result.assets[0]) {

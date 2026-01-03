@@ -10,8 +10,8 @@ export const API_CONFIG = {
     ANALYZE_FACE: '/api/analyze-face',
   },
   
-  // Request timeout (60 seconds for AI processing)
-  TIMEOUT: 60000,
+  // Request timeout (120 seconds for AI processing + large image upload)
+  TIMEOUT: 120000,
 };
 
 export const getAnalyzeUrl = () => `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ANALYZE_FACE}`;

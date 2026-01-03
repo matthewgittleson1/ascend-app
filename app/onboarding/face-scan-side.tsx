@@ -45,8 +45,9 @@ export default function FaceScanSideScreen() {
         mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [3, 4],
-        quality: 0.8,
+        quality: 0.3,
         base64: true,
+        exif: false,
       });
 
       if (!result.canceled && result.assets[0]) {
@@ -83,8 +84,9 @@ export default function FaceScanSideScreen() {
         mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [3, 4],
-        quality: 0.8,
+        quality: 0.3,
         base64: true,
+        exif: false,
       });
 
       if (!result.canceled && result.assets[0]) {

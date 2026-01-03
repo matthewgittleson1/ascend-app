@@ -365,10 +365,13 @@ export default function WelcomeScreen() {
               <Ionicons name="arrow-forward" size={24} color={AscendColors.bg} />
             </TouchableOpacity>
             
-            <View style={styles.statusContainer}>
+            <TouchableOpacity 
+              style={styles.statusContainer} 
+              onPress={() => router.push('/onboarding/face-scan-front')}
+            >
               <View style={styles.statusDot} />
-              <Text style={styles.statusText}>System Online • v4.2.0</Text>
-            </View>
+              <Text style={styles.statusText}>System Online • v4.2.0 [DEV: tap to skip]</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </SafeAreaView>

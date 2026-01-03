@@ -3,7 +3,7 @@
 
 export const config = {
   runtime: 'edge',
-  maxDuration: 60, // Allow up to 60 seconds for Grok reasoning
+  maxDuration: 60,
 };
 
 interface AnalysisRequest {
