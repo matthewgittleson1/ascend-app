@@ -7,8 +7,16 @@ export async function analyzeFace(request: AnalysisRequest): Promise<AnalysisRes
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
 
+  const apiUrl = getAnalyzeUrl();
+  console.log('[analyzeFace] Starting analysis...');
+  console.log('[analyzeFace] API URL:', apiUrl);
+  console.log('[analyzeFace] Request userData:', JSON.stringify(request.userData));
+  console.log('[analyzeFace] Front image length:', request.frontImage?.length || 0);
+  console.log('[analyzeFace] Side image length:', request.sideImage?.length || 0);
+
   try {
-    const response = await fetch(getAnalyzeUrl(), {
+    console.log('[analyzeFace] Sending POST request...');
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -19,12 +27,30 @@ export async function analyzeFace(request: AnalysisRequest): Promise<AnalysisRes
 
     clearTimeout(timeoutId);
 
+    console.log('[analyzeFace] Response status:', response.status);
+    console.log('[analyzeFace] Response ok:', response.ok);
+    console.log('[analyzeFace] Response headers:', JSON.stringify(Object.fromEntries(response.headers.entries())));
+
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `Server error: ${response.status}`);
+      const errorText = await response.text();
+      console.error('[analyzeFace] Error response body:', errorText);
+      
+      // Try to parse as JSON, otherwise use the text
+      let errorMessage = `Server error: ${response.status}`;
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.error || errorMessage;
+      } catch {
+        // If not JSON, check if it's an HTML 404 page
+        if (response.status === 404) {
+          errorMessage = 'API endpoint not found (404). Please check if the Vercel API is deployed.';
+        }
+      }
+      throw new Error(errorMessage);
     }
 
     const result: AnalysisResult = await response.json();
+    console.log('[analyzeFace] Analysis successful, score:', result.score);
     
     if (!result.success) {
       throw new Error(result.error || 'Analysis failed');
@@ -33,6 +59,7 @@ export async function analyzeFace(request: AnalysisRequest): Promise<AnalysisRes
     return result;
   } catch (error) {
     clearTimeout(timeoutId);
+    console.error('[analyzeFace] Caught error:', error);
     
     if (error instanceof Error) {
       if (error.name === 'AbortError') {

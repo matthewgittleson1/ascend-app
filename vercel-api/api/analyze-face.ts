@@ -117,6 +117,8 @@ function getTierFromScore(score: number): string {
 }
 
 export default async function handler(req: Request): Promise<Response> {
+  console.log('[API] Request received:', req.method);
+  
   // CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -127,10 +129,12 @@ export default async function handler(req: Request): Promise<Response> {
 
   // Handle preflight
   if (req.method === 'OPTIONS') {
+    console.log('[API] Handling OPTIONS preflight');
     return new Response(null, { status: 200, headers });
   }
 
   if (req.method !== 'POST') {
+    console.log('[API] Method not allowed:', req.method);
     return new Response(
       JSON.stringify({ success: false, error: 'Method not allowed' }),
       { status: 405, headers }
@@ -138,10 +142,16 @@ export default async function handler(req: Request): Promise<Response> {
   }
 
   try {
+    console.log('[API] Parsing request body...');
     const body: AnalysisRequest = await req.json();
     const { frontImage, sideImage, userData } = body;
 
+    console.log('[API] Front image length:', frontImage?.length || 0);
+    console.log('[API] Side image length:', sideImage?.length || 0);
+    console.log('[API] User data:', JSON.stringify(userData));
+
     if (!frontImage || !sideImage) {
+      console.log('[API] Missing images');
       return new Response(
         JSON.stringify({ success: false, error: 'Both front and side images are required' }),
         { status: 400, headers }
@@ -150,12 +160,13 @@ export default async function handler(req: Request): Promise<Response> {
 
     const apiKey = process.env.XAI_API_KEY;
     if (!apiKey) {
-      console.error('XAI_API_KEY not configured');
+      console.error('[API] XAI_API_KEY not configured!');
       return new Response(
-        JSON.stringify({ success: false, error: 'API configuration error' }),
+        JSON.stringify({ success: false, error: 'API configuration error - missing API key' }),
         { status: 500, headers }
       );
     }
+    console.log('[API] API key found, length:', apiKey.length);
 
     // Prepare the prompt with user context
     let prompt = ANALYSIS_PROMPT;
@@ -172,6 +183,8 @@ export default async function handler(req: Request): Promise<Response> {
     }
 
     // Call Grok API with vision
+    console.log('[API] Calling Grok API...');
+    const grokStartTime = Date.now();
     const grokResponse = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -212,17 +225,21 @@ export default async function handler(req: Request): Promise<Response> {
       }),
     });
 
+    console.log('[API] Grok response received in', Date.now() - grokStartTime, 'ms');
+    console.log('[API] Grok response status:', grokResponse.status);
+
     if (!grokResponse.ok) {
       const errorText = await grokResponse.text();
-      console.error('Grok API error:', errorText);
+      console.error('[API] Grok API error:', errorText);
       return new Response(
-        JSON.stringify({ success: false, error: 'Analysis service error' }),
+        JSON.stringify({ success: false, error: `Analysis service error: ${grokResponse.status}` }),
         { status: 500, headers }
       );
     }
 
     const grokData = await grokResponse.json();
     const content = grokData.choices?.[0]?.message?.content;
+    console.log('[API] Grok content length:', content?.length || 0);
 
     if (!content) {
       return new Response(
@@ -266,12 +283,14 @@ export default async function handler(req: Request): Promise<Response> {
       priorityActions: analysisResult.priorityActions || [],
     };
 
+    console.log('[API] Success! Score:', response.currentScore, '-> Potential:', response.potentialScore);
     return new Response(JSON.stringify(response), { status: 200, headers });
 
   } catch (error) {
-    console.error('Handler error:', error);
+    console.error('[API] Handler error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return new Response(
-      JSON.stringify({ success: false, error: 'Internal server error' }),
+      JSON.stringify({ success: false, error: errorMessage }),
       { status: 500, headers }
     );
   }
