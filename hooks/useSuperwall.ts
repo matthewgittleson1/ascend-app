@@ -28,15 +28,21 @@ export function useSuperwall() {
     }
   };
 
-  const showPaywall = async (triggerId: string) => {
-    if (isLoading || Platform.OS === 'web') return;
+  const showPaywall = async (triggerId: string): Promise<{ userSubscribed: boolean }> => {
+    if (isLoading || Platform.OS === 'web') {
+      return { userSubscribed: false };
+    }
     
     try {
       await superwallService.presentPaywall(triggerId);
       // Refresh subscription status after paywall interaction
-      await checkSubscription();
+      const status = await superwallService.getSubscriptionStatus();
+      const subscribed = status === SubscriptionStatus.ACTIVE;
+      setIsSubscribed(subscribed);
+      return { userSubscribed: subscribed };
     } catch (error) {
       console.error('[Superwall] Hook failed to show paywall:', error);
+      return { userSubscribed: false };
     }
   };
 

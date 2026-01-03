@@ -36,6 +36,13 @@
         }
       ],
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos for facial analysis.",
+          "cameraPermission": "Allow $(PRODUCT_NAME) to take photos for facial analysis."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",

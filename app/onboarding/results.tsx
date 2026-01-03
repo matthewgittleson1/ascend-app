@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, ScrollView, Platform } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -9,20 +9,30 @@ import { useSuperwall } from '@/hooks/useSuperwall';
 import { SUPERWALL_TRIGGERS } from '@/config/superwall';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { BlurView } from 'expo-blur';
+import { FacialMetric } from '@/types/analysis';
 
-const metrics = [
-  { id: 'jawline', label: 'Jawline & Lower Third', score: 6.2, potential: 9.1 },
-  { id: 'eyes', label: 'Eye Area', score: 5.8, potential: 8.9 },
-  { id: 'skin', label: 'Skin Quality', score: 4.5, potential: 9.5 },
-  { id: 'lean', label: 'Leanness & Definition', score: 5.5, potential: 8.8 },
-  { id: 'midface', label: 'Midface & Cheekbones', score: 6.0, potential: 8.5 },
-  { id: 'hair', label: 'Hair & Coloring', score: 5.2, potential: 9.2 },
+// Fallback metrics if no analysis result
+const fallbackMetrics: FacialMetric[] = [
+  { id: 'jawline', label: 'Jawline & Lower Third', score: 6.2, potential: 9.1, insights: '', improvements: [] },
+  { id: 'eyes', label: 'Eye Area', score: 5.8, potential: 8.9, insights: '', improvements: [] },
+  { id: 'skin', label: 'Skin Quality', score: 4.5, potential: 9.5, insights: '', improvements: [] },
+  { id: 'facial_harmony', label: 'Facial Harmony', score: 5.5, potential: 8.8, insights: '', improvements: [] },
+  { id: 'midface', label: 'Midface & Cheekbones', score: 6.0, potential: 8.5, insights: '', improvements: [] },
+  { id: 'overall_impression', label: 'Overall Impression', score: 5.2, potential: 9.2, insights: '', improvements: [] },
 ];
 
 export default function ResultsScreen() {
   const router = useRouter();
   const { showPaywall } = useSuperwall();
-  const { setIsOnboarded } = useOnboarding();
+  const { setIsOnboarded, analysisResult, capturedImages } = useOnboarding();
+
+  // Use real results or fallback
+  const currentScore = analysisResult?.currentScore ?? 5.5;
+  const potentialScore = analysisResult?.potentialScore ?? 9.2;
+  const currentTier = analysisResult?.currentTier ?? 'AVERAGE';
+  const potentialTier = analysisResult?.potentialTier ?? 'VERY ATTRACTIVE';
+  const metrics = analysisResult?.metrics ?? fallbackMetrics;
+  const summary = analysisResult?.summary ?? 'Your personalized analysis is ready. Unlock to see your full potential.';
 
   const handleUnlock = async () => {
     const result = await showPaywall(SUPERWALL_TRIGGERS.ONBOARDING);
@@ -30,6 +40,13 @@ export default function ResultsScreen() {
       await setIsOnboarded(true);
       router.replace('/(tabs)');
     }
+  };
+
+  // Format tier for display
+  const formatTier = (tier: string) => {
+    return tier.split(' ').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    ).join(' ');
   };
 
   return (
@@ -41,72 +58,114 @@ export default function ResultsScreen() {
           <View style={styles.header}>
             <View style={styles.scoreContainer}>
               <Text style={styles.scoreLabel}>CURRENT</Text>
-              <Text style={styles.scoreValue}>5.5</Text>
-              <Text style={styles.scoreClass}>NORMIE</Text>
+              <Text style={styles.scoreValue}>{currentScore.toFixed(1)}</Text>
+              <Text style={styles.scoreClass}>{formatTier(currentTier)}</Text>
             </View>
             <View style={styles.arrowContainer}>
-               <Ionicons name="arrow-forward" size={24} color={AscendColors.muted} />
+              <Ionicons name="arrow-forward" size={24} color={AscendColors.muted} />
             </View>
             <View style={styles.scoreContainer}>
               <Text style={styles.scoreLabel}>POTENTIAL</Text>
-              <Text style={styles.scoreValueHighlight}>9.2</Text>
-              <Text style={styles.scoreClassHighlight}>CHAD</Text>
+              <Text style={styles.scoreValueHighlight}>{potentialScore.toFixed(1)}</Text>
+              <Text style={styles.scoreClassHighlight}>{formatTier(potentialTier)}</Text>
             </View>
           </View>
 
           <View style={styles.visualsContainer}>
             <View style={styles.imageBox}>
-               <Ionicons name="person" size={60} color={AscendColors.muted} />
-               <Text style={styles.imageLabel}>Current</Text>
+              {capturedImages.frontImage ? (
+                <Image 
+                  source={{ uri: capturedImages.frontImage }} 
+                  style={styles.capturedImage}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Ionicons name="person" size={60} color={AscendColors.muted} />
+              )}
+              <Text style={styles.imageLabel}>Current</Text>
             </View>
             <View style={[styles.imageBox, styles.imageBoxBlur]}>
-               <Ionicons name="lock-closed" size={40} color={AscendColors.accent} />
-               <Text style={styles.imageLabel}>Potential</Text>
-               <BlurView intensity={20} style={StyleSheet.absoluteFill} tint="dark" />
+              <Ionicons name="lock-closed" size={40} color={AscendColors.accent} />
+              <Text style={styles.imageLabel}>Potential</Text>
+              <BlurView intensity={20} style={StyleSheet.absoluteFill} tint="dark" />
             </View>
           </View>
+
+          {/* Summary Card */}
+          {analysisResult && (
+            <View style={styles.summaryCard}>
+              <Text style={styles.summaryTitle}>Your Analysis</Text>
+              <Text style={styles.summaryText}>{summary}</Text>
+            </View>
+          )}
 
           <View style={styles.metricsList}>
             <Text style={styles.sectionTitle}>Detailed Analysis</Text>
             {/* Blurring the detailed analysis */}
             <View style={styles.blurContainer}>
-                {metrics.map((metric) => (
+              {metrics.map((metric) => (
                 <View key={metric.id} style={styles.metricRow}>
-                    <View style={styles.metricHeader}>
+                  <View style={styles.metricHeader}>
                     <Text style={styles.metricLabel}>{metric.label}</Text>
                     <View style={styles.metricScores}>
-                        <Text style={styles.currScore}>{metric.score}</Text>
-                        <Ionicons name="arrow-forward" size={12} color={AscendColors.muted} />
-                        <Text style={styles.potScore}>{metric.potential}</Text>
+                      <Text style={styles.currScore}>{metric.score.toFixed(1)}</Text>
+                      <Ionicons name="arrow-forward" size={12} color={AscendColors.muted} />
+                      <Text style={styles.potScore}>{metric.potential.toFixed(1)}</Text>
                     </View>
-                    </View>
-                    <View style={styles.barContainer}>
+                  </View>
+                  <View style={styles.barContainer}>
                     <View style={[styles.barBase, { width: `${metric.score * 10}%` }]} />
                     <View style={[styles.barGain, { width: `${(metric.potential - metric.score) * 10}%` }]} />
-                    </View>
+                  </View>
+                  {metric.insights && (
+                    <Text style={styles.insightText} numberOfLines={2}>{metric.insights}</Text>
+                  )}
                 </View>
-                ))}
-                
-                <BlurView intensity={20} style={styles.absoluteBlur} tint="dark">
-                    <View style={styles.lockOverlay}>
-                        <View style={styles.lockIconCircle}>
-                            <Ionicons name="lock-closed" size={32} color={AscendColors.text} />
-                        </View>
-                    </View>
-                </BlurView>
+              ))}
+
+              <BlurView intensity={20} style={styles.absoluteBlur} tint="dark">
+                <View style={styles.lockOverlay}>
+                  <View style={styles.lockIconCircle}>
+                    <Ionicons name="lock-closed" size={32} color={AscendColors.text} />
+                  </View>
+                  <Text style={styles.unlockPrompt}>Unlock Full Analysis</Text>
+                </View>
+              </BlurView>
             </View>
           </View>
 
+          {/* Priority Actions Preview */}
+          {analysisResult?.priorityActions && analysisResult.priorityActions.length > 0 && (
+            <View style={styles.actionsPreview}>
+              <Text style={styles.sectionTitle}>Your Priority Actions</Text>
+              <View style={styles.blurContainer}>
+                {analysisResult.priorityActions.slice(0, 3).map((action, index) => (
+                  <View key={index} style={styles.actionItem}>
+                    <View style={styles.actionNumber}>
+                      <Text style={styles.actionNumberText}>{index + 1}</Text>
+                    </View>
+                    <Text style={styles.actionText} numberOfLines={2}>{action}</Text>
+                  </View>
+                ))}
+                <BlurView intensity={15} style={styles.absoluteBlur} tint="dark">
+                  <View style={styles.lockOverlay}>
+                    <Ionicons name="lock-closed" size={24} color={AscendColors.text} />
+                  </View>
+                </BlurView>
+              </View>
+            </View>
+          )}
+
         </ScrollView>
-        
+
         <View style={styles.footer}>
-           <View style={styles.lockInfo}>
-             <Ionicons name="lock-closed" size={16} color={AscendColors.muted} />
-             <Text style={styles.lockText}>Full analysis locked</Text>
-           </View>
-           <HapticButton style={styles.button} onPress={handleUnlock}>
-              <Text style={styles.buttonText}>Unlock My Full Report</Text>
-           </HapticButton>
+          <View style={styles.lockInfo}>
+            <Ionicons name="lock-closed" size={16} color={AscendColors.muted} />
+            <Text style={styles.lockText}>Full analysis & improvement plan locked</Text>
+          </View>
+          <HapticButton style={styles.button} onPress={handleUnlock}>
+            <Text style={styles.buttonText}>Unlock My Full Report</Text>
+          </HapticButton>
         </View>
       </SafeAreaView>
     </View>
@@ -126,7 +185,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 24,
-    paddingBottom: 100,
+    paddingBottom: 140,
   },
   header: {
     flexDirection: 'row',
@@ -141,6 +200,7 @@ const styles = StyleSheet.create({
   },
   scoreContainer: {
     alignItems: 'center',
+    flex: 1,
   },
   scoreLabel: {
     fontSize: 12,
@@ -159,24 +219,25 @@ const styles = StyleSheet.create({
     color: AscendColors.emerald,
   },
   scoreClass: {
-    fontSize: 12,
+    fontSize: 11,
     color: AscendColors.muted,
     marginTop: 4,
     fontWeight: '600',
   },
   scoreClassHighlight: {
-    fontSize: 12,
+    fontSize: 11,
     color: AscendColors.emerald,
     marginTop: 4,
     fontWeight: '700',
   },
   arrowContainer: {
     opacity: 0.5,
+    paddingHorizontal: 8,
   },
   visualsContainer: {
     flexDirection: 'row',
     gap: 16,
-    marginBottom: 32,
+    marginBottom: 24,
   },
   imageBox: {
     flex: 1,
@@ -193,15 +254,43 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: AscendColors.accent,
   },
+  capturedImage: {
+    width: '100%',
+    height: '100%',
+  },
   imageLabel: {
     position: 'absolute',
     bottom: 8,
     fontSize: 12,
     color: 'rgba(255,255,255,0.7)',
     zIndex: 10,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  summaryCard: {
+    backgroundColor: AscendColors.card,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: AscendColors.border,
+  },
+  summaryTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: AscendColors.accent,
+    marginBottom: 8,
+  },
+  summaryText: {
+    fontSize: 15,
+    color: AscendColors.text,
+    lineHeight: 22,
   },
   metricsList: {
-    gap: 20,
+    gap: 16,
+    marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 18,
@@ -210,30 +299,37 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   blurContainer: {
-      position: 'relative',
-      borderRadius: 12,
-      overflow: 'hidden',
-      gap: 20,
-      padding: 10,
+    position: 'relative',
+    borderRadius: 12,
+    overflow: 'hidden',
+    gap: 16,
+    padding: 12,
+    backgroundColor: 'rgba(21, 27, 40, 0.5)',
   },
   absoluteBlur: {
-      ...StyleSheet.absoluteFillObject,
-      justifyContent: 'center',
-      alignItems: 'center',
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   lockOverlay: {
-      alignItems: 'center',
-      justifyContent: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   lockIconCircle: {
-      width: 64,
-      height: 64,
-      borderRadius: 32,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: 'rgba(255,255,255,0.2)',
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  unlockPrompt: {
+    color: AscendColors.text,
+    fontSize: 14,
+    marginTop: 12,
+    fontWeight: '600',
   },
   metricRow: {
     gap: 8,
@@ -246,6 +342,7 @@ const styles = StyleSheet.create({
   metricLabel: {
     fontSize: 14,
     color: AscendColors.text,
+    flex: 1,
   },
   metricScores: {
     flexDirection: 'row',
@@ -275,6 +372,37 @@ const styles = StyleSheet.create({
   barGain: {
     backgroundColor: AscendColors.emerald,
     height: '100%',
+  },
+  insightText: {
+    fontSize: 12,
+    color: AscendColors.muted,
+    fontStyle: 'italic',
+  },
+  actionsPreview: {
+    gap: 12,
+  },
+  actionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  actionNumber: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: AscendColors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionNumberText: {
+    color: AscendColors.bg,
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  actionText: {
+    flex: 1,
+    fontSize: 14,
+    color: AscendColors.text,
   },
   footer: {
     position: 'absolute',
