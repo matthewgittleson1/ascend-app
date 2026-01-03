@@ -3,7 +3,7 @@
 
 export const API_CONFIG = {
   // Your Vercel deployment URL
-  BASE_URL: 'https://ascend-app-phi.vercel.app',
+  BASE_URL: 'https://vercel-api-two-phi.vercel.app',
   
   // Endpoints
   ENDPOINTS: {
