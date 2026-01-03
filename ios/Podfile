@@ -13,95 +13,6 @@ install! 'cocoapods',
 
 prepare_react_native_project!
 
-# =============================================================
-# FIX: Patch Folly for iOS 18.4 SDK / Xcode 16.3+ compatibility
-# =============================================================
-def patch_folly_for_ios18(installer)
-  pods_root = installer.sandbox.root
-  range_h_path = File.join(pods_root, 'RCT-Folly', 'folly', 'Range.h')
-  
-  return unless File.exist?(range_h_path)
-  
-  content = File.read(range_h_path)
-  
-  # Check if already patched
-  if content.include?('FOLLY_IOS_CHAR_TRAITS_FIX')
-    puts "[Folly Patch] Range.h already patched"
-    return
-  end
-  
-  # The patch: add char_traits<unsigned char> specialization AFTER includes, BEFORE namespace folly
-  patch = <<~'PATCH'
-// FOLLY_IOS_CHAR_TRAITS_FIX: iOS 18.4 SDK removed std::char_traits<unsigned char>
-#if defined(__APPLE__) && defined(__cplusplus)
-namespace std {
-template <>
-struct char_traits<unsigned char> {
-  using char_type = unsigned char;
-  using int_type = int;
-  using off_type = std::streamoff;
-  using pos_type = std::streampos;
-  using state_type = std::mbstate_t;
-  static constexpr void assign(char_type& c1, const char_type& c2) noexcept { c1 = c2; }
-  static constexpr bool eq(char_type c1, char_type c2) noexcept { return c1 == c2; }
-  static constexpr bool lt(char_type c1, char_type c2) noexcept { return c1 < c2; }
-  static constexpr int compare(const char_type* s1, const char_type* s2, size_t n) {
-    for (size_t i = 0; i < n; ++i) {
-      if (lt(s1[i], s2[i])) return -1;
-      if (lt(s2[i], s1[i])) return 1;
-    }
-    return 0;
-  }
-  static constexpr size_t length(const char_type* s) {
-    size_t len = 0;
-    while (!eq(s[len], char_type())) ++len;
-    return len;
-  }
-  static constexpr const char_type* find(const char_type* s, size_t n, const char_type& a) {
-    for (size_t i = 0; i < n; ++i) { if (eq(s[i], a)) return s + i; }
-    return nullptr;
-  }
-  static constexpr char_type* move(char_type* s1, const char_type* s2, size_t n) {
-    if (n == 0) return s1;
-    if (s1 < s2) { for (size_t i = 0; i < n; ++i) assign(s1[i], s2[i]); }
-    else { for (size_t i = n; i > 0; --i) assign(s1[i-1], s2[i-1]); }
-    return s1;
-  }
-  static constexpr char_type* copy(char_type* s1, const char_type* s2, size_t n) {
-    for (size_t i = 0; i < n; ++i) assign(s1[i], s2[i]);
-    return s1;
-  }
-  static constexpr char_type* assign(char_type* s, size_t n, char_type a) {
-    for (size_t i = 0; i < n; ++i) s[i] = a;
-    return s;
-  }
-  static constexpr int_type not_eof(int_type c) noexcept { return eq_int_type(c, eof()) ? ~eof() : c; }
-  static constexpr char_type to_char_type(int_type c) noexcept { return char_type(c); }
-  static constexpr int_type to_int_type(char_type c) noexcept { return int_type(c); }
-  static constexpr bool eq_int_type(int_type c1, int_type c2) noexcept { return c1 == c2; }
-  static constexpr int_type eof() noexcept { return -1; }
-};
-} // namespace std
-#endif
-// END FOLLY_IOS_CHAR_TRAITS_FIX
-
-PATCH
-
-  # Insert AFTER the last #include but BEFORE namespace folly
-  # Look for the pattern: includes followed by FOLLY_PUSH_WARNING
-  patched = content.sub(
-    /(#include <folly\/lang\/Byte\.h>\n\n\/\/ Ignore shadowing.*?\nFOLLY_PUSH_WARNING\nFOLLY_GNU_DISABLE_WARNING.*?\n\nnamespace folly \{)/m,
-    "#include <folly/lang/Byte.h>\n\n#{patch}\n// Ignore shadowing warnings within this file, so includers can use -Wshadow.\nFOLLY_PUSH_WARNING\nFOLLY_GNU_DISABLE_WARNING(\"-Wshadow\")\n\nnamespace folly {"
-  )
-  
-  if patched != content
-    File.write(range_h_path, patched)
-    puts "[Folly Patch] Successfully patched Range.h for iOS 18.4 SDK"
-  else
-    puts "[Folly Patch] Could not find insertion point in Range.h"
-  end
-end
-
 target 'expoappboilerplate' do
   use_expo_modules!
 
@@ -128,14 +39,12 @@ target 'expoappboilerplate' do
   use_react_native!(
     :path => config[:reactNativePath],
     :hermes_enabled => podfile_properties['expo.jsEngine'] == nil || podfile_properties['expo.jsEngine'] == 'hermes',
+    # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/..",
     :privacy_file_aggregation_enabled => podfile_properties['apple.privacyManifestAggregationEnabled'] != 'false',
   )
 
   post_install do |installer|
-    # Apply Folly patch for iOS 18.4 SDK compatibility
-    patch_folly_for_ios18(installer)
-    
     react_native_post_install(
       installer,
       config[:reactNativePath],
@@ -143,18 +52,8 @@ target 'expoappboilerplate' do
       :ccache_enabled => podfile_properties['apple.ccacheEnabled'] == 'true',
     )
 
-    # Set C++20 standard across all pods
-    installer.pods_project.targets.each do |target|
-      target.build_configurations.each do |config|
-        config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++20'
-      end
-    end
-    
-    installer.pods_project.build_configurations.each do |config|
-      config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++20'
-    end
-
-    # Code signing fix for Xcode 14+
+    # This is necessary for Xcode 14, because it signs resource bundles by default
+    # when building for devices.
     installer.target_installation_results.pod_target_installation_results
       .each do |pod_name, target_installation_result|
       target_installation_result.resource_bundle_targets.each do |resource_bundle_target|
@@ -162,6 +61,124 @@ target 'expoappboilerplate' do
           config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
         end
       end
+    end
+
+    # ============================================================
+    # FIX: Patch Folly for Xcode 16.3+ / iOS 18.4 SDK
+    # The iOS 18.4 SDK removed std::char_traits<unsigned char>
+    # This patch adds it back so Folly compiles correctly
+    # ============================================================
+    folly_range_path = File.join(__dir__, 'Pods/RCT-Folly/folly/Range.h')
+    if File.exist?(folly_range_path)
+      content = File.read(folly_range_path)
+      
+      # Only patch if not already patched
+      unless content.include?('FOLLY_CHAR_TRAITS_PATCH')
+        puts "[Folly Patch] Patching Range.h for iOS 18.4 SDK compatibility..."
+        
+        char_traits_patch = <<~'PATCH'
+
+// FOLLY_CHAR_TRAITS_PATCH: Fix for iOS 18.4 SDK / Xcode 16.3+
+// std::char_traits<unsigned char> was removed from libc++
+#include <string>
+namespace std {
+template <>
+struct char_traits<unsigned char> {
+  using char_type = unsigned char;
+  using int_type = int;
+  using off_type = std::streamoff;
+  using pos_type = std::streampos;
+  using state_type = std::mbstate_t;
+
+  static void assign(char_type& c1, const char_type& c2) noexcept { c1 = c2; }
+  static constexpr bool eq(char_type c1, char_type c2) noexcept { return c1 == c2; }
+  static constexpr bool lt(char_type c1, char_type c2) noexcept { return c1 < c2; }
+
+  static int compare(const char_type* s1, const char_type* s2, size_t n) {
+    for (size_t i = 0; i < n; ++i) {
+      if (lt(s1[i], s2[i])) return -1;
+      if (lt(s2[i], s1[i])) return 1;
+    }
+    return 0;
+  }
+
+  static size_t length(const char_type* s) {
+    size_t len = 0;
+    while (!eq(s[len], char_type())) ++len;
+    return len;
+  }
+
+  static const char_type* find(const char_type* s, size_t n, const char_type& a) {
+    for (size_t i = 0; i < n; ++i) {
+      if (eq(s[i], a)) return s + i;
+    }
+    return nullptr;
+  }
+
+  static char_type* move(char_type* dest, const char_type* src, size_t n) {
+    if (n == 0) return dest;
+    return static_cast<char_type*>(memmove(dest, src, n));
+  }
+
+  static char_type* copy(char_type* dest, const char_type* src, size_t n) {
+    if (n == 0) return dest;
+    return static_cast<char_type*>(memcpy(dest, src, n));
+  }
+
+  static char_type* assign(char_type* s, size_t n, char_type a) {
+    for (size_t i = 0; i < n; ++i) s[i] = a;
+    return s;
+  }
+
+  static constexpr int_type not_eof(int_type c) noexcept {
+    return eq_int_type(c, eof()) ? ~eof() : c;
+  }
+
+  static constexpr char_type to_char_type(int_type c) noexcept {
+    return static_cast<char_type>(c);
+  }
+
+  static constexpr int_type to_int_type(char_type c) noexcept {
+    return static_cast<int_type>(c);
+  }
+
+  static constexpr bool eq_int_type(int_type c1, int_type c2) noexcept {
+    return c1 == c2;
+  }
+
+  static constexpr int_type eof() noexcept { return -1; }
+};
+} // namespace std
+// END FOLLY_CHAR_TRAITS_PATCH
+
+PATCH
+
+        # Insert BEFORE #if FOLLY_HAS_STRING_VIEW to ensure char_traits is defined before string_view is included
+        insert_match = content.match(/#if FOLLY_HAS_STRING_VIEW/m)
+        if insert_match
+          insert_pos = insert_match.begin(0)
+          patched_content = content[0...insert_pos] + char_traits_patch + content[insert_pos..-1]
+          File.chmod(0644, folly_range_path)
+          File.write(folly_range_path, patched_content)
+          puts "[Folly Patch] Successfully patched Range.h for iOS 18.4 SDK (before string_view)"
+        else
+           # Fallback to before namespace folly
+           namespace_match = content.match(/^namespace folly \{/m)
+           if namespace_match
+             insert_pos = namespace_match.begin(0)
+             patched_content = content[0...insert_pos] + char_traits_patch + content[insert_pos..-1]
+             File.chmod(0644, folly_range_path)
+             File.write(folly_range_path, patched_content)
+             puts "[Folly Patch] Successfully patched Range.h for iOS 18.4 SDK (before namespace folly)"
+           else
+             puts "[Folly Patch] WARNING: Could not find insertion point in Range.h"
+           end
+        end
+      else
+        puts "[Folly Patch] Range.h already patched, skipping"
+      end
+    else
+      puts "[Folly Patch] Range.h not found at expected path, skipping"
     end
   end
 end
