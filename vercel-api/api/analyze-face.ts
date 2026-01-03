@@ -38,71 +38,97 @@ interface AnalysisResponse {
   error?: string;
 }
 
-const ANALYSIS_PROMPT = `You are an expert facial aesthetics analyst. Analyze the provided front and side profile images to evaluate facial features.
+const ANALYSIS_PROMPT = `You are an expert PSL (Pretty Scale Level) facial aesthetics analyst specializing in looksmaxxing. Analyze the provided front and side profile images using objective facial harmony principles.
 
-IMPORTANT: Provide honest, constructive analysis. Be encouraging but realistic.
+SCORING PHILOSOPHY:
+- Use the TRUE PSL scale where 5.0 is genuinely average. Most people score 4.0-6.0.
+- Be CRITICAL on current scores - identify genuine areas for improvement. Don't inflate.
+- Be GENEROUS on potential scores - show what's achievable with proper looksmaxxing.
+- The gap between current and potential should motivate action (typically 1.5-3.0 points difference).
+- Score each category independently based on objective criteria.
+
+PSL TIER SCALE:
+- 1.0-3.9: Below Average (significant asymmetry, recession, or harmony issues)
+- 4.0-5.4: Average (typical features, room for softmaxxing improvements)
+- 5.5-6.4: Above Average (good base, minor refinements needed)
+- 6.5-7.9: Attractive (strong features, approaching model-tier with optimization)
+- 8.0-10.0: Very Attractive (elite tier, minimal improvements possible)
+
+CATEGORY ANALYSIS CRITERIA:
+
+1. JAWLINE & LOWER THIRD: Assess mandibular definition, gonial angle, chin projection (Marlon-tier features). Look for recession, weak masseter development, submental fat.
+
+2. EYE AREA: Evaluate canthal tilt, under-eye support, orbital rim projection, interpupillary harmony, hunter vs prey eye assessment. Check for upper eyelid exposure, scleral show.
+
+3. SKIN QUALITY: Analyze texture, clarity, collagen quality, hyperpigmentation, acne scarring, pore visibility. Consider age-appropriate expectations.
+
+4. FACIAL HARMONY & SYMMETRY: Measure thirds ratio, facial width-to-height, midline alignment, feature proportions. Identify asymmetries.
+
+5. MIDFACE & CHEEKBONES: Evaluate zygomatic projection, infraorbital support, midface length ratio, ogee curve. Look for flat or recessed cheekbones.
+
+6. OVERALL IMPRESSION (HALO): The gestalt effect - how features combine. First impression impact, phenotype harmony, standout features vs failo.
 
 Return a JSON response with this EXACT structure (no markdown, just raw JSON):
 {
-  "currentScore": <number 1-10, one decimal>,
-  "potentialScore": <number 1-10, one decimal, always higher than currentScore>,
+  "currentScore": <number 1-10, one decimal - BE CRITICAL>,
+  "potentialScore": <number 1-10, one decimal - BE OPTIMISTIC, always 1.5-3.0 higher than current>,
   "currentTier": "<BELOW AVERAGE|AVERAGE|ABOVE AVERAGE|ATTRACTIVE|VERY ATTRACTIVE>",
-  "potentialTier": "<same scale, based on potential>",
+  "potentialTier": "<same scale, based on looksmaxxing potential>",
   "metrics": [
     {
       "id": "jawline",
       "label": "Jawline & Lower Third",
-      "score": <1-10>,
-      "potential": <1-10>,
-      "insights": "<brief current state observation>",
-      "improvements": ["<specific actionable improvement>", "<another improvement>"]
+      "score": <1-10, critical assessment>,
+      "potential": <1-10, after mewing/training>,
+      "insights": "<PSL-informed observation using terms like gonial angle, mandible, chin projection>",
+      "improvements": ["<specific looksmaxxing technique>", "<another actionable step>"]
     },
     {
       "id": "eyes",
       "label": "Eye Area",
       "score": <1-10>,
       "potential": <1-10>,
-      "insights": "<observation>",
-      "improvements": ["<improvement>", "<improvement>"]
+      "insights": "<assessment of canthal tilt, orbital area, hunter eyes potential>",
+      "improvements": ["<specific improvement>", "<technique or treatment>"]
     },
     {
       "id": "skin",
       "label": "Skin Quality",
       "score": <1-10>,
       "potential": <1-10>,
-      "insights": "<observation>",
-      "improvements": ["<improvement>", "<improvement>"]
+      "insights": "<texture, clarity, collagen assessment>",
+      "improvements": ["<skincare protocol>", "<treatment option>"]
     },
     {
       "id": "facial_harmony",
       "label": "Facial Harmony & Symmetry",
       "score": <1-10>,
       "potential": <1-10>,
-      "insights": "<observation>",
-      "improvements": ["<improvement>", "<improvement>"]
+      "insights": "<thirds ratio, symmetry analysis>",
+      "improvements": ["<corrective approach>", "<optimization technique>"]
     },
     {
       "id": "midface",
       "label": "Midface & Cheekbones",
       "score": <1-10>,
       "potential": <1-10>,
-      "insights": "<observation>",
-      "improvements": ["<improvement>", "<improvement>"]
+      "insights": "<zygomatic projection, infraorbital assessment>",
+      "improvements": ["<enhancement method>", "<technique>"]
     },
     {
       "id": "overall_impression",
       "label": "Overall Impression",
       "score": <1-10>,
       "potential": <1-10>,
-      "insights": "<observation>",
-      "improvements": ["<improvement>", "<improvement>"]
+      "insights": "<halo effect, standout features, areas holding back overall rating>",
+      "improvements": ["<highest impact change>", "<secondary focus>"]
     }
   ],
-  "summary": "<2-3 sentence personalized summary of their potential and key focus areas>",
-  "priorityActions": ["<top priority action>", "<second priority>", "<third priority>"]
+  "summary": "<2-3 sentences using looksmaxxing terminology. Be direct about current level, enthusiastic about potential. Mention their biggest 'failo' and biggest 'halo'>",
+  "priorityActions": ["<#1 looksmaxxing priority>", "<#2 priority>", "<#3 priority>"]
 }
 
-User context (if provided):
+User context:
 - Gender: {{gender}}
 - Age Range: {{ageRange}}
 - Focus Areas: {{focusAreas}}
@@ -240,6 +266,15 @@ export default async function handler(req: Request): Promise<Response> {
 
     const grokData = await grokResponse.json();
     const content = grokData.choices?.[0]?.message?.content;
+    
+    // Token usage logging
+    const usage = grokData.usage;
+    if (usage) {
+      console.log('[API] Token Usage - Prompt:', usage.prompt_tokens, '| Completion:', usage.completion_tokens, '| Total:', usage.total_tokens);
+      // Rough cost estimate (adjust based on actual Grok pricing)
+      const estimatedCost = ((usage.prompt_tokens * 0.00001) + (usage.completion_tokens * 0.00003)).toFixed(4);
+      console.log('[API] Estimated cost: $' + estimatedCost);
+    }
     console.log('[API] Grok content length:', content?.length || 0);
 
     if (!content) {
@@ -284,7 +319,18 @@ export default async function handler(req: Request): Promise<Response> {
       priorityActions: analysisResult.priorityActions || [],
     };
 
-    console.log('[API] Success! Score:', response.currentScore, '-> Potential:', response.potentialScore);
+    // Log detailed category breakdown
+    console.log('[API] ===== ANALYSIS RESULTS =====');
+    console.log('[API] Overall:', response.currentScore, '(' + response.currentTier + ') -> Potential:', response.potentialScore, '(' + response.potentialTier + ')');
+    if (response.metrics && response.metrics.length > 0) {
+      console.log('[API] ----- Category Scores -----');
+      for (const metric of response.metrics) {
+        console.log('[API]', metric.label + ':', metric.score, '->', metric.potential, '|', metric.insights?.substring(0, 60) + '...');
+      }
+    }
+    console.log('[API] Summary:', response.summary?.substring(0, 100) + '...');
+    console.log('[API] Priority Actions:', response.priorityActions?.join(' | '));
+    console.log('[API] =============================');
     return new Response(JSON.stringify(response), { status: 200, headers });
 
   } catch (error) {
