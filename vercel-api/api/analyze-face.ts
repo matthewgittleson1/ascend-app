@@ -2,6 +2,7 @@
 // Deploy this to Vercel - add XAI_API_KEY to environment variables
 
 export const config = {
+  runtime: 'edge',
   maxDuration: 60, // Allow up to 60 seconds for Grok reasoning
 };
 
